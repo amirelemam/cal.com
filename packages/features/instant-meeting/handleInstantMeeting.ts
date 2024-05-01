@@ -75,9 +75,10 @@ const handleInstantMeetingWebhookTrigger = async (args: {
 
 async function handler(req: NextApiRequest) {
   let eventType = await getEventTypesFromDB(req.body.eventTypeId);
+  const isTeamEvent = !!eventType?.teamId ?? !!eventType?.team;
   eventType = {
     ...eventType,
-    bookingFields: getBookingFieldsWithSystemFields(eventType),
+    bookingFields: getBookingFieldsWithSystemFields({ ...eventType, isTeamEvent }),
   };
 
   if (!eventType.team?.id) {

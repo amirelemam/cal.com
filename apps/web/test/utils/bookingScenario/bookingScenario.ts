@@ -1408,7 +1408,15 @@ export function mockErrorOnVideoMeetingCreation({
   });
 }
 
-export function getBooker({ name, email }: { name: string; email: string }) {
+export function getBooker({
+  name,
+  email,
+  phoneNumber,
+}: {
+  name: string;
+  email: string;
+  phoneNumber?: string;
+}) {
   return {
     name,
     email,
