@@ -47,17 +47,12 @@ export const sendSMS = async (
   teamId?: number | null,
   whatsapp = false
 ) => {
-  log.silly("sendSMS", JSON.stringify({ phoneNumber, body, sender, userId, teamId }));
-  console.log("sendSMS", JSON.stringify({ phoneNumber, body, sender, userId, teamId }));
-
   const isSMSSendingLocked = await isLockedForSMSSending(userId, teamId);
 
   if (isSMSSendingLocked) {
     log.debug(`${teamId ? `Team id ${teamId} ` : `User id ${userId} `} is locked for SMS sending `);
     return;
   }
-  log.debug("sendSMS", JSON.stringify({ phoneNumber, body, sender, userId, teamId }));
-  console.log("sendSMS", JSON.stringify({ phoneNumber, body, sender, userId, teamId }));
 
   const testMode = process.env.NEXT_PUBLIC_IS_E2E || process.env.INTEGRATION_TEST_MODE;
 
