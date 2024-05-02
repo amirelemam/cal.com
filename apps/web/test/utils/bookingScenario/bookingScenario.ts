@@ -19,15 +19,18 @@ import logger from "@calcom/lib/logger";
 import { safeStringify } from "@calcom/lib/safeStringify";
 import { ProfileRepository } from "@calcom/lib/server/repository/profile";
 import type { WorkflowActions, WorkflowTemplates, WorkflowTriggerEvents } from "@calcom/prisma/client";
-import type { SchedulingType } from "@calcom/prisma/enums";
+import type { SchedulingType, SMSLockState } from "@calcom/prisma/enums";
 import type { BookingStatus } from "@calcom/prisma/enums";
 import type { teamMetadataSchema } from "@calcom/prisma/zod-utils";
 import type { userMetadataType } from "@calcom/prisma/zod-utils";
+import type { eventTypeBookingFields } from "@calcom/prisma/zod-utils";
 import type { AppMeta } from "@calcom/types/App";
 import type { NewCalendarEventType } from "@calcom/types/Calendar";
 import type { EventBusyDate, IntervalLimit } from "@calcom/types/Calendar";
 
 import { getMockPaymentService } from "./MockPaymentService";
+
+type Fields = z.infer<typeof eventTypeBookingFields>;
 
 logger.settings.minLevel = 0;
 const log = logger.getSubLogger({ prefix: ["[bookingScenario]"] });
@@ -952,6 +955,7 @@ export function getOrganizer({
   teams,
   organizationId,
   metadata,
+  smsLockState,
 }: {
   name: string;
   email: string;
@@ -965,6 +969,7 @@ export function getOrganizer({
   weekStart?: WeekDays;
   teams?: InputUser["teams"];
   metadata?: userMetadataType;
+  smsLockState?: SMSLockState;
 }) {
   return {
     ...TestData.users.example,
@@ -981,6 +986,7 @@ export function getOrganizer({
     organizationId,
     profiles: [],
     metadata,
+    smsLockState,
   };
 }
 
@@ -1411,15 +1417,16 @@ export function mockErrorOnVideoMeetingCreation({
 export function getBooker({
   name,
   email,
-  phoneNumber,
+  attendeePhoneNumber,
 }: {
   name: string;
   email: string;
-  phoneNumber?: string;
+  attendeePhoneNumber?: string;
 }) {
   return {
     name,
     email,
+    attendeePhoneNumber,
   };
 }
 
@@ -1529,4 +1536,82 @@ export const getMockFailingAppStatus = ({ slug }: { slug: string }) => {
 
 export const getMockPassingAppStatus = ({ slug }: { slug: string }) => {
   return getMockAppStatus({ slug, failures: 0, success: 1 });
+};
+
+export const getDefaultBookingFields = (bookingFields?: Fields = []) => {
+  return [
+    {
+      name: "name",
+      type: "name",
+      sources: [{ id: "default", type: "default", label: "Default" }],
+      editable: "system",
+      required: true,
+      defaultLabel: "your_name",
+    },
+    {
+      name: "email",
+      type: "email",
+      label: "",
+      hidden: false,
+      sources: [{ id: "default", type: "default", label: "Default" }],
+      editable: "system",
+      required: true,
+      placeholder: "",
+      defaultLabel: "email_address",
+    },
+    {
+      name: "location",
+      type: "radioInput",
+      sources: [{ id: "default", type: "default", label: "Default" }],
+      editable: "system",
+      required: false,
+      defaultLabel: "location",
+      getOptionsAt: "locations",
+      optionsInputs: {
+        phone: { type: "phone", required: true, placeholder: "" },
+        attendeeInPerson: { type: "address", required: true, placeholder: "" },
+      },
+      hideWhenJustOneOption: true,
+    },
+    {
+      name: "title",
+      type: "text",
+      hidden: true,
+      sources: [{ id: "default", type: "default", label: "Default" }],
+      editable: "system-but-optional",
+      required: true,
+      defaultLabel: "what_is_this_meeting_about",
+      defaultPlaceholder: "",
+    },
+    {
+      name: "notes",
+      type: "textarea",
+      sources: [{ id: "default", type: "default", label: "Default" }],
+      editable: "system-but-optional",
+      required: false,
+      defaultLabel: "additional_notes",
+      defaultPlaceholder: "share_additional_notes",
+    },
+    {
+      name: "guests",
+      type: "multiemail",
+      hidden: false,
+      sources: [{ id: "default", type: "default", label: "Default" }],
+      editable: "system-but-optional",
+      required: false,
+      defaultLabel: "additional_guests",
+      defaultPlaceholder: "email",
+    },
+    {
+      name: "rescheduleReason",
+      type: "textarea",
+      views: [{ id: "reschedule", label: "Reschedule View" }],
+      sources: [{ id: "default", type: "default", label: "Default" }],
+      editable: "system-but-optional",
+      required: false,
+      defaultLabel: "reason_for_reschedule",
+      defaultPlaceholder: "reschedule_placeholder",
+    },
+    ...bookingFields,
+  ] as Fields;
 };

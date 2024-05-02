@@ -30,6 +30,8 @@ export function getMockRequestDataForBooking({
       email: string;
       name: string;
       location: { optionValue: ""; value: string };
+      attendeePhoenNumber?: string;
+      smsReminderNumber?: string;
     };
   };
 }) {
