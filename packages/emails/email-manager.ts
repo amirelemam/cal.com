@@ -11,7 +11,6 @@ import * as twilio from "@calcom/features/ee/workflows/lib/reminders/providers/t
 import { SENDER_ID } from "@calcom/lib/constants";
 import { WEBAPP_URL } from "@calcom/lib/constants";
 import { formatCalEvent } from "@calcom/lib/formatCalendarEvent";
-import logger from "@calcom/lib/logger";
 import { TimeFormat } from "@calcom/lib/timeFormat";
 import type { CalendarEvent, Person } from "@calcom/types/Calendar";
 
@@ -65,8 +64,6 @@ import OrganizerScheduledEmail from "./templates/organizer-scheduled-email";
 import SlugReplacementEmail from "./templates/slug-replacement-email";
 import type { TeamInvite } from "./templates/team-invite-email";
 import TeamInviteEmail from "./templates/team-invite-email";
-
-const log = logger.getSubLogger({ prefix: ["[TEST]"] });
 
 const sendEmail = (prepare: () => BaseEmail) => {
   return new Promise((resolve, reject) => {
@@ -206,8 +203,6 @@ export const sendScheduledEmails = async (
   const formattedCalEvent = formatCalEvent(calEvent);
   const emailsToSend: Promise<unknown>[] = [];
 
-  console.log("calEvent", calEvent);
-
   if (!hostEmailDisabled) {
     emailsToSend.push(sendEmail(() => new OrganizerScheduledEmail({ calEvent: formattedCalEvent })));
 
@@ -259,17 +254,22 @@ export const sendRoundRobinScheduledEmails = async (calEvent: CalendarEvent, mem
   await Promise.all(emailsToSend);
 };
 
-export const sendRoundRobinRescheduledEmails = async (calEvent: CalendarEvent, members: Person[]) => {
+export const sendRoundRobinRescheduledEmails = async (
+  calEvent: CalendarEvent,
+  teamMembersAndAttendees: Person[]
+) => {
   const calendarEvent = formatCalEvent(calEvent);
   const emailsToSend: Promise<unknown>[] = [];
 
-  for (const teamMember of members) {
+  for (const person of teamMembersAndAttendees) {
     emailsToSend.push(
-      sendEmail(() => new OrganizerRescheduledEmail({ calEvent: calendarEvent, teamMember }))
+      sendEmail(() => new OrganizerRescheduledEmail({ calEvent: calendarEvent, teamMember: person }))
     );
   }
 
   await Promise.all(emailsToSend);
+  const successfullyReScheduledSMS = new EventSuccessfullyReScheduledSMS(calEvent);
+  await successfullyReScheduledSMS.sendSMSToAttendees();
 };
 
 export const sendRoundRobinCancelledEmails = async (calEvent: CalendarEvent, members: Person[]) => {
