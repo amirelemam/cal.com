@@ -1485,7 +1485,7 @@ export function getMockBookingReference(
 }
 
 export function getMockBookingAttendee(
-  attendee: Omit<Attendee, "bookingId"> & {
+  attendee: Omit<Attendee, "bookingId", "phoneNumber"> & {
     bookingSeat?: AttendeeBookingSeatInput;
     phoneNumber?: string | null;
   }
@@ -1497,7 +1497,7 @@ export function getMockBookingAttendee(
     email: attendee.email,
     locale: attendee.locale,
     bookingSeat: attendee.bookingSeat || null,
-    phoneNumber: attendee.phoneNumber,
+    phoneNumber: attendee.phoneNumber ?? undefined,
   };
 }
 
@@ -1538,7 +1538,7 @@ export const getMockPassingAppStatus = ({ slug }: { slug: string }) => {
   return getMockAppStatus({ slug, failures: 0, success: 1 });
 };
 
-export const getDefaultBookingFields = (bookingFields?: Fields = []) => {
+export const getDefaultBookingFields = (bookingFields: Fields = []) => {
   return [
     {
       name: "name",
