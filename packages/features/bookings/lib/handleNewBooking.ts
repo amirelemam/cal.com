@@ -28,7 +28,7 @@ import { getUsersAvailability } from "@calcom/core/getUserAvailability";
 import dayjs from "@calcom/dayjs";
 import { scheduleMandatoryReminder } from "@calcom/ee/workflows/lib/reminders/scheduleMandatoryReminder";
 import {
-  sendAttendeeRequestEmail,
+  sendAttendeeRequestEmailAndSMS,
   sendOrganizerRequestEmail,
   sendRescheduledEmailsAndSMS,
   sendRoundRobinCancelledEmails,
@@ -557,6 +557,7 @@ export async function getBookingData<T extends z.ZodType>({
       bookingFields: eventType.bookingFields,
       responses,
     });
+
   return {
     ...reqBody,
     name: responses.name,
@@ -2169,7 +2170,7 @@ async function handler(
       })
     );
     await sendOrganizerRequestEmail({ ...evt, additionalNotes });
-    await sendAttendeeRequestEmail({ ...evt, additionalNotes }, attendeesList[0]);
+    await sendAttendeeRequestEmailAndSMS({ ...evt, additionalNotes }, attendeesList[0]);
   }
 
   if (booking.location?.startsWith("http")) {

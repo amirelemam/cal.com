@@ -1,4 +1,4 @@
-import { sendAttendeeRequestEmail, sendOrganizerRequestEmail } from "@calcom/emails";
+import { sendAttendeeRequestEmailAndSMS, sendOrganizerRequestEmail } from "@calcom/emails";
 import { getWebhookPayloadForBooking } from "@calcom/features/bookings/lib/getWebhookPayloadForBooking";
 import getWebhooks from "@calcom/features/webhooks/lib/getWebhooks";
 import sendPayload from "@calcom/features/webhooks/lib/sendOrSchedulePayload";
@@ -37,7 +37,7 @@ export async function handleBookingRequested(args: {
 
   log.debug("Emails: Sending booking requested emails");
   await sendOrganizerRequestEmail({ ...evt });
-  await sendAttendeeRequestEmail({ ...evt }, evt.attendees[0]);
+  await sendAttendeeRequestEmailAndSMS({ ...evt }, evt.attendees[0]);
 
   try {
     const subscribersBookingRequested = await getWebhooks({

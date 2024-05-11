@@ -1565,7 +1565,13 @@ export const getMockPassingAppStatus = ({ slug, overrideName }: { slug: string; 
   return getMockAppStatus({ slug, overrideName, failures: 0, success: 1 });
 };
 
-export const getDefaultBookingFields = (bookingFields: Fields = []) => {
+export const getDefaultBookingFields = ({
+  emailField,
+  bookingFields = [],
+}: {
+  emailField?: Fields[number];
+  bookingFields: Fields;
+}) => {
   return [
     {
       name: "name",
@@ -1575,17 +1581,19 @@ export const getDefaultBookingFields = (bookingFields: Fields = []) => {
       required: true,
       defaultLabel: "your_name",
     },
-    {
-      name: "email",
-      type: "email",
-      label: "",
-      hidden: false,
-      sources: [{ id: "default", type: "default", label: "Default" }],
-      editable: "system",
-      required: true,
-      placeholder: "",
-      defaultLabel: "email_address",
-    },
+    !!emailField
+      ? emailField
+      : {
+          name: "email",
+          type: "email",
+          label: "",
+          hidden: false,
+          sources: [{ id: "default", type: "default", label: "Default" }],
+          editable: "system",
+          required: true,
+          placeholder: "",
+          defaultLabel: "email_address",
+        },
     {
       name: "location",
       type: "radioInput",
