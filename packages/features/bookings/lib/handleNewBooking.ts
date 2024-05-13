@@ -61,6 +61,7 @@ import {
   parseRecurringEvent,
 } from "@calcom/lib";
 import { getVideoCallUrlFromCalEvent } from "@calcom/lib/CalEventParser";
+import { BOOKED_WITH_SMS_EMAIL } from "@calcom/lib/constants";
 import { getDefaultEvent, getUsernameList } from "@calcom/lib/defaultEvents";
 import { ErrorCode } from "@calcom/lib/errorCodes";
 import { getErrorFromUnknown } from "@calcom/lib/errors";
@@ -557,6 +558,10 @@ export async function getBookingData<T extends z.ZodType>({
       bookingFields: eventType.bookingFields,
       responses,
     });
+
+  if (!responses.email) {
+    responses.email = BOOKED_WITH_SMS_EMAIL;
+  }
 
   return {
     ...reqBody,
