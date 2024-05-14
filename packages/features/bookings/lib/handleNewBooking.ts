@@ -64,7 +64,6 @@ import {
   parseRecurringEvent,
 } from "@calcom/lib";
 import { getVideoCallUrlFromCalEvent } from "@calcom/lib/CalEventParser";
-import { BOOKED_WITH_SMS_EMAIL } from "@calcom/lib/constants";
 import { getDefaultEvent, getUsernameList } from "@calcom/lib/defaultEvents";
 import { ErrorCode } from "@calcom/lib/errorCodes";
 import { getErrorFromUnknown } from "@calcom/lib/errors";
@@ -563,7 +562,7 @@ export async function getBookingData<T extends z.ZodType>({
     });
 
   if (!responses.email) {
-    responses.email = BOOKED_WITH_SMS_EMAIL;
+    throw new Error("Booker email in `responses` must not be nullish");
   }
 
   return {
